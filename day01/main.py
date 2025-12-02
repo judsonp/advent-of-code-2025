@@ -2,15 +2,19 @@ from pathlib import Path
 from typing import List
 
 
-def part_one(data: List[str]) -> int:
+def parse(data: List[str]) -> List[int]:
     split_data = [(x[:1], x[1:]) for x in data]
-    int_data = [
+    return [
         int(amount) if direction == "R" else -int(amount)
         for (direction, amount) in split_data
     ]
+
+
+def part_one(data: List[str]) -> int:
+    turns = parse(data)
     dial = 50
     password = 0
-    for turn in int_data:
+    for turn in turns:
         dial += turn
         dial %= 100
         if dial == 0:
@@ -19,14 +23,10 @@ def part_one(data: List[str]) -> int:
 
 
 def part_two(data: List[str]) -> int:
-    split_data = [(x[:1], x[1:]) for x in data]
-    int_data = [
-        int(amount) if direction == "R" else -int(amount)
-        for (direction, amount) in split_data
-    ]
+    turns = parse(data)
     dial = 50
     password = 0
-    for turn in int_data:
+    for turn in turns:
         # If we start from zero and turn left, divmod will produce 1 just to get the
         # dial positive again, even though we didn't cross zero.
         # In this case, adjust the starting dial position to 100 (which is the same mod
