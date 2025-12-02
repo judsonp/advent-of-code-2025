@@ -18,13 +18,6 @@ def part_one(data: List[str]) -> int:
     return password
 
 
-def signum(n: int) -> int:
-    if n > 0:
-        return 1
-    if n < 0:
-        return -1
-    return 0
-
 def part_two(data: List[str]) -> int:
     split_data = [(x[:1], x[1:]) for x in data]
     int_data = [
@@ -34,12 +27,24 @@ def part_two(data: List[str]) -> int:
     dial = 50
     password = 0
     for turn in int_data:
-        direction = signum(turn)
-        for _ in range(abs(turn)):
-            dial = (dial + direction) % 100
-            if dial == 0:
-                password += 1
+        # If we start from zero and turn left, divmod will produce 1 just to get the
+        # dial positive again, even though we didn't cross zero.
+        # In this case, adjust the starting dial position to 100 (which is the same mod
+        # 100) so that we don't count this one.
+        if dial == 0 and turn < 0:
+            dial = 100
+
+        password_delta, dial = divmod(dial + turn, 100)
+        password_delta = abs(password_delta)
+
+        # If we turn left and land on exactly zero, divmod won't notice, but it counts.
+        # If we turned right, it will have already counted it.
+        if turn < 0 and dial == 0:
+            password_delta += 1
+
+        password += password_delta
     return password
+
 
 def test_part_one() -> None:
     with Path("example.txt").open() as f:
