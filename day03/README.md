@@ -1,6 +1,6 @@
-# Advent of Code 2025 - Day 02
+# Advent of Code 2025 - Day 03
 
-This project contains the solution for Advent of Code 2025, Day 02.
+This project contains the solution for Advent of Code 2025, Day 03.
 
 ## Setup
 
