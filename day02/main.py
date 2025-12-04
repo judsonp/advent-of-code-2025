@@ -49,6 +49,18 @@ def expand_half_to_invalid(half: int) -> int:
     return int(f"{half}{half}")
 
 
+def truncated_range(r: InclusiveRange, sublen: int) -> InclusiveRange:
+    # r.lower and r.upper must be the same number of digits
+    # and must be evenly divisible by sublen
+    lower = str(r.lower)[:sublen]
+    upper = str(r.upper)[:sublen]
+    return InclusiveRange(int(lower), int(upper))
+
+
+def expand_trunc_to_invalid(half: int, repeats: int) -> int:
+    return int(str(half) * repeats)
+
+
 def parse(data: str) -> List[InclusiveRange]:
     text_ranges = data.split(",")
     tuple_ranges = [tuple(r.split("-", 1)) for r in text_ranges]
@@ -76,7 +88,24 @@ def part_one(data: str) -> int:
 
 
 def part_two(data: str) -> int:
-    return 0
+    invalid_numbers = set()
+
+    ranges = parse(data)
+    split_ranges = (split_range(r) for r in ranges)
+    consolidated = list(chain.from_iterable(split_ranges))
+
+    for rng in consolidated:
+        rng_len = num_digits(rng.lower)
+        substr_lens = filter(lambda x: rng_len % x == 0, range(1, rng_len // 2 + 1))
+        for substr_len in substr_lens:
+            times = rng_len // substr_len
+            trunc_range = truncated_range(rng, substr_len)
+            for trunc in range(trunc_range.lower, trunc_range.upper + 1):
+                invalid = expand_trunc_to_invalid(trunc, times)
+                if rng.contains(invalid):
+                    invalid_numbers.add(invalid)
+
+    return sum(invalid_numbers)
 
 
 def test_part_one() -> None:
@@ -88,7 +117,7 @@ def test_part_one() -> None:
 def test_part_two() -> None:
     with Path("example.txt").open() as f:
         data = f.read()
-    # assert part_two(data) == 0
+    assert part_two(data) == 4174379265
 
 
 if __name__ == "__main__":
