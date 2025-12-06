@@ -11,6 +11,17 @@ class InclusiveRange:
     def contains(self, n: int) -> bool:
         return self.lower <= n <= self.upper
 
+    def size(self) -> int:
+        return self.upper - self.lower + 1
+
+    def overlaps(self, other: "InclusiveRange") -> bool:
+        return self.lower <= other.lower <= self.upper or \
+               self.lower <= other.upper <= self.upper
+
+    def merge(self, other: "InclusiveRange") -> "InclusiveRange":
+        return InclusiveRange(min(self.lower, other.lower),
+                              max(self.upper, other.upper))
+
     def __repr__(self) -> str:
         return f"{self.lower}-{self.upper}"
 
@@ -19,6 +30,23 @@ class InclusiveRange:
 class Input:
     ranges: List[InclusiveRange]
     items: List[int]
+
+
+def merge_ranges(ranges: List[InclusiveRange]) -> List[InclusiveRange]:
+    sorted_ranges = sorted(ranges)
+    merged_ranges = []
+    cur = None
+    for rng in sorted_ranges:
+        if cur is None:
+            cur = rng
+        elif cur.overlaps(rng):
+            cur = cur.merge(rng)
+        else:
+            merged_ranges.append(cur)
+            cur = rng
+    if cur is not None:
+        merged_ranges.append(cur)
+    return merged_ranges
 
 
 def part_one(data: Input) -> int:
@@ -30,7 +58,7 @@ def part_one(data: Input) -> int:
 
 
 def part_two(data: Input) -> int:
-    return 0
+    return sum(rng.size() for rng in merge_ranges(data.ranges))
 
 
 def parse(data: str) -> Input:
@@ -51,7 +79,7 @@ def test_part_one() -> None:
 def test_part_two() -> None:
     with Path("example.txt").open() as f:
         data = parse(f.read())
-    # assert part_two(data) == 0
+    assert part_two(data) == 14
 
 
 def test_check_parse() -> None:
