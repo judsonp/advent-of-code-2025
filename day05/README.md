@@ -1,6 +1,6 @@
-# Advent of Code 2025 - Day 04
+# Advent of Code 2025 - Day 05
 
-This project contains the solution for Advent of Code 2025, Day 04.
+This project contains the solution for Advent of Code 2025, Day 05.
 
 ## Setup
 
