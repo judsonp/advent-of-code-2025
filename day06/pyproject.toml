@@ -4,9 +4,6 @@ version = "0.1.0"
 description = "Advent of Code 2025 Day 06"
 authors = [{name = "Judson Powers"}]
 requires-python = ">=3.8"
-dependencies = [
-    "more-itertools",
-]
 
 [project.optional-dependencies]
 dev = ["pytest", "ruff", "mypy"]

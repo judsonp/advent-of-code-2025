@@ -1,8 +1,15 @@
+import math
 from itertools import groupby
 from pathlib import Path
-from typing import List, Tuple
+from typing import Iterable, List, Tuple
 
-from more_itertools import intersperse
+
+def solve(op: str, values: Iterable[int]) -> int:
+    if op == "*":
+        return math.prod(values)
+    if op == "+":
+        return sum(values)
+    raise ValueError
 
 
 def part_one(data: List[List[str]]) -> int:
@@ -10,25 +17,22 @@ def part_one(data: List[List[str]]) -> int:
     ops = data[-1]
     values = data[:-1]
     for col in range(len(ops)):
-        problem_values = [v[col] for v in values]
-        problem = list(intersperse(ops[col], problem_values))
-        result = eval(" ".join(problem))  # noqa: S307
-        grand_total += result
+        problem_values = (int(v[col]) for v in values)
+        grand_total += solve(ops[col], problem_values)
     return grand_total
 
 
 def part_two(ops: List[str], numbergrid: List[List[str]]) -> int:
     grand_total = 0
-    transposed_grid = [list(row) for row in zip(*numbergrid)]
-    raw_numbers_str = ["".join(x) for x in transposed_grid]
-    raw_numbers_int = [int(x) if not x.isspace() else None for x in raw_numbers_str]
+    transposed_grid = (list(row) for row in zip(*numbergrid))
+    raw_numbers_str = ("".join(x) for x in transposed_grid)
+    raw_numbers_int = (int(x) if not x.isspace() else None for x in raw_numbers_str)
     number_groups = [list(group) for key, group in
                      groupby(raw_numbers_int, lambda x: x is None) if not key]
     assert(len(number_groups) == len(ops))
     for op, numbers in zip(ops, number_groups):
-        problem = list(intersperse(op, [str(x) for x in numbers]))
-        result = eval(" ".join(problem))  # noqa: S307
-        grand_total += result
+        # there shouldn't be any None here, this is just making type hints happy
+        grand_total += solve(op, (x for x in numbers if x is not None))
     return grand_total
 
 
