@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 
 
 def part_one(data: List[str]) -> int:
@@ -24,9 +24,30 @@ def part_one(data: List[str]) -> int:
     return num_splits
 
 
-def part_two(data: List[str]) -> int:
-    return 0
+def addsert(d: Dict[int, int], k: int, v: int) -> None:
+    if k not in d:
+        d[k] = 0
+    d[k] += v
 
+
+def part_two(data: List[str]) -> int:
+    initial_line = data[0]
+    data = data[1:]
+    start_pos = initial_line.index("S")
+    timelines = {start_pos: 1}
+
+    for row in data:
+        splitter_locs = {i for i, c in enumerate(row) if c == "^"}
+        new_timelines: Dict[int, int] = {}
+        for col, count in timelines.items():
+            if col in splitter_locs:
+                addsert(new_timelines, col + 1, count)
+                addsert(new_timelines, col - 1, count)
+            else:
+                addsert(new_timelines, col, count)
+        timelines = new_timelines
+
+    return sum(timelines.values())
 
 def test_part_one() -> None:
     with Path("example.txt").open() as f:
@@ -37,7 +58,7 @@ def test_part_one() -> None:
 def test_part_two() -> None:
     with Path("example.txt").open() as f:
         data = f.read().splitlines()
-    # assert part_two(data) == 0
+    assert part_two(data) == 40
 
 
 if __name__ == "__main__":
