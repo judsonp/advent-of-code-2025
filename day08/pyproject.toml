@@ -1,0 +1,26 @@
+[project]
+name = "advent-of-code-2025-day07"
+version = "0.1.0"
+description = "Advent of Code 2025 Day 07"
+authors = [{name = "Judson Powers"}]
+requires-python = ">=3.8"
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff", "mypy"]
+
+[project.scripts]
+solve = "main:__main__"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+python_files = "main.py"
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "C90", "N", "UP", "YTT", "S", "BLE", "FBT", "B", "A", "COM", "C4", "DTZ", "T10", "EM", "EXE", "ISC", "ICN", "G", "INP", "PIE", "T20", "PYI", "PT", "Q", "RSE", "RET", "SLF", "SIM", "TID", "TCH", "ARG", "PTH", "ERA", "PD", "PGH", "PL", "TRY", "FLY", "NPY", "PERF", "RUF"]
+ignore = ["S101", "PLR2004", "T201"]
+
+[tool.mypy]
+strict = true
