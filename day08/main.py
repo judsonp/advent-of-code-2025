@@ -27,7 +27,7 @@ def find_and_remove(circuits: List[Set[int]], box: int) -> Optional[Set[int]]:
 
 
 def add_circuit(circuits: List[Set[int]], distances: List[Tuple[float, int, int]]) \
-        -> None:
+        -> Tuple[int, int]:
     _, left, right = distances.pop()
     new_circuit = {left, right}
     left_set = find_and_remove(circuits, left)
@@ -37,6 +37,7 @@ def add_circuit(circuits: List[Set[int]], distances: List[Tuple[float, int, int]
     if right_set:
         new_circuit = new_circuit.union(right_set)
     circuits.append(new_circuit)
+    return left, right
 
 
 def part_one(data: List[str], num_connections: int, num_solution_circuits: int) -> int:
@@ -52,7 +53,7 @@ def part_one(data: List[str], num_connections: int, num_solution_circuits: int) 
                                key = lambda x: x[0], reverse = True)
     circuits: List[Set[int]] = []
     for _ in range(num_connections):
-        add_circuit(circuits, sorted_distances)
+        _ = add_circuit(circuits, sorted_distances)
 
     sorted_circuits = sorted(circuits, key = lambda x: len(x), reverse = True)
 
@@ -60,7 +61,21 @@ def part_one(data: List[str], num_connections: int, num_solution_circuits: int) 
 
 
 def part_two(data: List[str]) -> int:
-    return 0
+    junction_boxes = [Point(*[int(x) for x in line.split(",")]) for line in data]
+    distances = {(left, right): junction_boxes[left].distance(junction_boxes[right])
+                 for (left, right)
+                 in product(range(len(junction_boxes)), repeat = 2)
+                 if left < right}
+
+    sorted_distances = sorted([(distance, left, right)
+                               for (left, right), distance
+                               in distances.items()],
+                               key = lambda x: x[0], reverse = True)
+    circuits: List[Set[int]] = []
+    while True:
+        left, right = add_circuit(circuits, sorted_distances)
+        if len(circuits) == 1 and len(circuits[0]) == len(junction_boxes):
+            return junction_boxes[left].x * junction_boxes[right].x
 
 
 def test_part_one() -> None:
@@ -72,7 +87,7 @@ def test_part_one() -> None:
 def test_part_two() -> None:
     with Path("example.txt").open() as f:
         data = f.read().splitlines()
-    # assert part_two(data) == 0
+    assert part_two(data) == 25272
 
 
 if __name__ == "__main__":
