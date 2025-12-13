@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from itertools import chain, pairwise, product
+from itertools import chain, combinations, pairwise, product
 from pathlib import Path
 
 
@@ -54,7 +54,18 @@ def part_one(data: list[str]) -> int:
 def part_two(data: list[str]) -> int:
     points = [Point(*[int(x) for x in line.split(",")]) for line in data]
     lines = list(pairwise(chain(points, [points[0]])))
-    return max(a.rectangle_area(b) for a, b in product(points, repeat = 2) if is_valid_rectangle(a, b, lines))
+
+    candidates = sorted(
+        ((a.rectangle_area(b), a, b) for a, b in combinations(points, 2)),
+        key=lambda x: x[0],
+        reverse=True,
+    )
+
+    for area, a, b in candidates:
+        if is_valid_rectangle(a, b, lines):
+            return area
+
+    return 0
 
 
 def test_part_one() -> None:
