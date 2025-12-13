@@ -1,7 +1,6 @@
 from dataclasses import dataclass
-from itertools import product
+from itertools import chain, pairwise, product
 from pathlib import Path
-from typing import List
 
 
 @dataclass(frozen=True)
@@ -13,13 +12,49 @@ class Point:
         return (abs(self.x - other.x) + 1) * (abs(self.y - other.y) + 1)
 
 
-def part_one(data: List[str]) -> int:
+type Line = tuple[Point, Point]
+
+
+def line_intersects_rectangle(a: Point, b: Point, line: Line) -> bool:
+    # This input happens to have only horizontal or vertical lines,
+    # and we assume that property (so we check it here).
+    if line[0].x != line[1].x and line[0].y != line[1].y:
+        raise ValueError
+
+    if line[0].x == line[1].x:
+        # vertical line
+        # line is within the x extent of the rectangle
+        if min(a.x, b.x) < line[0].x < max(a.x, b.x):
+            # line is not entirely on one side or the other on the y axis
+            return not (max(line[0].y, line[1].y) <= min(a.y, b.y) or
+                        min(line[0].y, line[1].y) >= max(a.y, b.y))
+        return False
+    if line[0].y == line[1].y:
+        # horizontal line
+        # line is within the y extent of the rectangle
+        if min(a.y, b.y) < line[0].y < max(a.y, b.y):
+            # line is not entirely on one side or the other on the x axis
+            return not (max(line[0].x, line[1].x) <= min(a.x, b.x) or
+                        min(line[0].x, line[1].x) >= max(a.x, b.x))
+        return False
+
+    # already guaranteed this
+    raise ValueError
+
+
+def is_valid_rectangle(a: Point, b: Point, lines: list[Line]) -> bool:
+    return not any(line_intersects_rectangle(a, b, line) for line in lines)
+
+
+def part_one(data: list[str]) -> int:
     points = [Point(*[int(x) for x in line.split(",")]) for line in data]
     return max(a.rectangle_area(b) for a, b in product(points, repeat = 2))
 
 
-def part_two(data: List[str]) -> int:
-    return 0
+def part_two(data: list[str]) -> int:
+    points = [Point(*[int(x) for x in line.split(",")]) for line in data]
+    lines = list(pairwise(chain(points, [points[0]])))
+    return max(a.rectangle_area(b) for a, b in product(points, repeat = 2) if is_valid_rectangle(a, b, lines))
 
 
 def test_part_one() -> None:
@@ -31,7 +66,7 @@ def test_part_one() -> None:
 def test_part_two() -> None:
     with Path("example.txt").open() as f:
         data = f.read().splitlines()
-    # assert part_two(data) == 0
+    assert part_two(data) == 24
 
 
 if __name__ == "__main__":
