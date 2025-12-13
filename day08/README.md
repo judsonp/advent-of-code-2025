@@ -1,6 +1,6 @@
-# Advent of Code 2025 - Day 07
+# Advent of Code 2025 - Day 08
 
-This project contains the solution for Advent of Code 2025, Day 07.
+This project contains the solution for Advent of Code 2025, Day 08.
 
 ## Setup
 
