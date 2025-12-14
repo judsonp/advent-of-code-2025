@@ -2,7 +2,9 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+import numpy as np
 from bitarray import frozenbitarray
+from scipy.optimize import Bounds, LinearConstraint, milp
 
 
 @dataclass
@@ -66,12 +68,58 @@ def required_button_presses(machine: Machine) -> int:
         light_states = new_light_states
 
 
+def solve_min_sum_system(
+    coefficients: list[list[int]],
+    constants: list[int],
+) -> int:
+    # Convert inputs to numpy arrays
+    a = np.array(coefficients, dtype=float)
+    b = np.array(constants, dtype=float)
+
+    # Objective: Minimize sum(x)
+    # The cost vector c is all 1s -> minimize 1*x_1 + 1*x_2 + ...
+    c = np.ones(a.shape[1])
+
+    # Define Constraints: Ax = b
+    # We set lower_bound == upper_bound == b to enforce equality
+    constraints = LinearConstraint(a, lb=b, ub=b)
+
+    # Define Bounds: Nonnegative Integers (x >= 0)
+    # ub=np.inf means no upper limit
+    positive_bounds = Bounds(lb=0.0, ub=np.inf)
+
+    # Define Integrality: 1 forces the variable to be an integer
+    integrality = np.ones(a.shape[1], dtype=int)
+
+    # Solve
+    res = milp(
+        c=c,
+        constraints=constraints,
+        bounds=positive_bounds,
+        integrality=integrality,
+    )
+
+    if res.success:
+        return sum(np.round(res.x).astype(int).tolist())
+
+    raise ValueError
+
+
+def required_joltage_presses(machine: Machine) -> int:
+    constants = machine.joltage
+    coefficients = [
+        [1 if j_idx in button else 0 for button in machine.buttons]
+            for j_idx in range(len(constants))
+    ]
+    return solve_min_sum_system(coefficients, constants)
+
+
 def part_one(machines: list[Machine]) -> int:
     return sum(required_button_presses(machine) for machine in machines)
 
 
 def part_two(machines: list[Machine]) -> int:
-    return 0
+    return sum(required_joltage_presses(machine) for machine in machines)
 
 
 def test_press_buttons() -> None:
@@ -88,7 +136,7 @@ def test_part_one() -> None:
 def test_part_two() -> None:
     with Path("example.txt").open() as f:
         data = parse_input(f.read())
-    assert part_two(data) == 0
+    assert part_two(data) == 33
 
 
 if __name__ == "__main__":

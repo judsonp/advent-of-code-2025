@@ -4,10 +4,10 @@ version = "0.1.0"
 description = "Advent of Code 2025 Day 10"
 authors = [{name = "Judson Powers"}]
 requires-python = ">=3.12"
-dependencies = ["bitarray"]
+dependencies = ["bitarray", "numpy", "scipy"]
 
 [project.optional-dependencies]
-dev = ["pytest", "ruff", "mypy"]
+dev = ["pytest", "ruff", "mypy", "scipy-stubs"]
 
 [project.scripts]
 solve = "main:__main__"
